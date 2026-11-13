@@ -1,0 +1,186 @@
+﻿@page
+@model DessertOrders.Pages.Admin.OrdersModel
+@{
+    ViewData["Title"] = "Панель менеджера - Замовлення";
+}
+
+<div class="admin-orders-page">
+    <!-- Шапка страницы -->
+    <div class="admin-page-header">
+        <div>
+            <h1>Замовлення під опікою</h1>
+            <p>Сьогодні 18 маленьких приводів для радості. Зробимо кожен особливим.</p>
+        </div>
+        <div class="date-badge">
+            Сьогодні, @DateTime.Now.ToString("dd MMMM")
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="admin-stats-row">
+        <div class="stat-card">
+            <div class="stat-card-title">Замовлень сьогодні</div>
+            <div class="stat-card-value">@Model.OrdersTodayCount</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">Чекають підтвердження</div>
+            <div class="stat-card-value alert-value">@Model.PendingOrdersCount</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">Виторг за день</div>
+            <div class="stat-card-value">@Model.DailyRevenue $</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">Нових клієнтів</div>
+            <div class="stat-card-value">@Model.NewClientsTodayCount</div>
+        </div>
+    </div>
+
+    <!-- Двухколоночный дашборд -->
+    <div class="admin-orders-grid">
+        <!-- Левая колонка: Фильтры, поиск и таблица -->
+        <div class="orders-table-container">
+            <div class="filter-tabs">
+                <a href="@Url.Page("/Admin/Orders", new { status = "Усі", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Усі" ? "active" : "")">
+                   Усі · @Model.AllOrders.Count
+                </a>
+                <a href="@Url.Page("/Admin/Orders", new { status = "Новий", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Новий" ? "active" : "")">
+                   Нові · @Model.AllOrders.Count(o => o.Status == "Новий")
+                </a>
+                <a href="@Url.Page("/Admin/Orders", new { status = "Готується", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Готується" ? "active" : "")">
+                   Готуються · @Model.AllOrders.Count(o => o.Status == "Готується")
+                </a>
+                <a href="@Url.Page("/Admin/Orders", new { status = "Завершені", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Завершені" ? "active" : "")">
+                   Завершені · @Model.AllOrders.Count(o => o.Status == "Завершені")
+                </a>
+            </div>
+
+            <form method="get" class="search-form-admin">
+                <input type="hidden" name="status" value="@Model.CurrentStatus" />
+                <input type="text" name="searchQuery" value="@Model.SearchQuery" placeholder="🔍 Номер замовлення, ім'я чи телефон" onchange="this.form.submit()" class="search-input-admin" />
+            </form>
+
+            <div class="table-wrapper-box">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>№ зам.</th>
+                            <th>Клієнт</th>
+                            <th>Отримання</th>
+                            <th>Сума</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DisplayOrders.Any())
+                        {
+                            @foreach (var ord in Model.DisplayOrders)
+                            {
+                                <tr class="order-row-item @(Model.SelectedOrder?.Id == ord.Id ? "active-row" : "")" 
+                                    onclick="location.href='@Url.Page("/Admin/Orders", new { id = ord.Id, status = Model.CurrentStatus, searchQuery = Model.SearchQuery })'">
+                                    <td>
+                                        <strong class="order-id-txt">#@ord.Id</strong>
+                                        <div class="order-date-txt">@ord.CreatedAt.ToString("dd жовт.")</div>
+                                    </td>
+                                    <td>
+                                        <div class="client-name-txt">@(ord.User?.Name ?? "Гість")</div>
+                                        <div class="order-date-txt">@(ord.PaymentMethod)</div>
+                                    </td>
+                                    <td>@ord.DeliveryTime</td>
+                                    <td><strong>@ord.TotalAmount $</strong></td>
+                                    <td>
+                                        <span class="status-badge @(ord.Status == "Новий" ? "badge-new" : "badge-done")">
+                                            @ord.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="empty-table-msg">Замовлень не знайдено</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Правая панель: Детали заказа -->
+        <div class="order-details-sidebar-card">
+            @if (Model.SelectedOrder != null)
+            {
+                var selected = Model.SelectedOrder;
+                <div class="details-header-row">
+                    <h3>Замовлення #@selected.Id</h3>
+                    <span class="status-badge badge-new">@selected.Status</span>
+                </div>
+                <p class="details-sub-date">@selected.CreatedAt.ToString("dd MMMM, HH:mm") • З сайту</p>
+
+                <div class="details-section-box">
+                    <strong class="client-title-name">@(selected.User?.Name ?? "Гість")</strong>
+                    <div class="details-sub-text">@selected.Phone</div>
+                    <div class="details-sub-text">@(selected.User?.Email)</div>
+                </div>
+
+                <div class="details-section-box">
+                    <div class="details-sub-date">Отримання:</div>
+                    <div class="delivery-time-txt">@selected.DeliveryTime</div>
+                    <div class="details-sub-text">@(selected.DeliveryType == "Delivery" ? $"{selected.Address}, кв. {selected.Apartment}" : "Самовивіз")</div>
+                </div>
+
+                <div class="details-items-container">
+                    <div class="items-title-heading">У коробці</div>
+                    @foreach (var item in selected.Items)
+                    {
+                        <div class="item-row-line">
+                            <span>@item.DessertName × @item.Quantity</span>
+                            <strong>@(item.Price * item.Quantity) $</strong>
+                        </div>
+                    }
+                    <div class="item-row-line delivery-fee-line">
+                        <span>Доставка</span>
+                        <span>@selected.DeliveryFee $</span>
+                    </div>
+                </div>
+
+                <div class="details-total-row">
+                    <span>Разом</span>
+                    <span class="total-sum-value">@selected.TotalAmount $</span>
+                </div>
+
+                <form method="post" asp-page-handler="UpdateStatus">
+                    <input type="hidden" name="orderId" value="@selected.Id" />
+                    <input type="hidden" name="currentStatus" value="@Model.CurrentStatus" />
+                    <input type="hidden" name="searchQuery" value="@Model.SearchQuery" />
+
+                    @if (selected.Status == "Новий")
+                    {
+                        <input type="hidden" name="newStatus" value="Готується" />
+                        <button type="submit" class="action-btn-primary">Прийняти в роботу</button>
+                    }
+                    else if (selected.Status == "Готується")
+                    {
+                        <input type="hidden" name="newStatus" value="Завершені" />
+                        <button type="submit" class="action-btn-success">Завершити замовлення</button>
+                    }
+                    else
+                    {
+                        <div class="action-done-box">
+                            ✓ Замовлення виконано
+                        </div>
+                    }
+                </form>
+            }
+            else
+            {
+                <p class="select-order-placeholder">Оберіть замовлення зі списку</p>
+            }
+        </div>
+    </div>
+</div>

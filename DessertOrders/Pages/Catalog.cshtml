@@ -1,0 +1,399 @@
+﻿@page
+@model DessertOrders.Pages.CatalogModel
+@{
+    ViewData["Title"] = "Каталог десертів";
+}
+
+<div class="catalog-container">
+    <!-- Склянка з картками десертів -->
+    <div class="products">
+        <h1>Оберіть щось улюблене</h1>
+
+        <div class="cards">
+            @foreach (var item in Model.Desserts)
+            {
+                <div class="card" data-id="@item.Id" data-name="@item.Name" data-price="@item.Price">
+                    <img src="@item.ImageUrl" alt="@item.Name" />
+
+                    <div class="card-content">
+                        <h3>@item.Name</h3>
+                        <p>@item.Description</p>
+                        <div class="bottom">
+                            <span class="price">@item.Price $</span>
+                            <div class="action-zone">
+                                <button class="add-btn" onclick="addToCart(@item.Id)">
+                                    До кошика
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }      
+        </div>
+    </div>
+
+    <!-- Плаваюча кнопка відкриття кошика (для мобільних та швидкого доступу) -->
+    <div id="floatingCartBtn" onclick="openCart()" class="floating-cart-btn" style="display: none;">
+        <div class="floating-cart-inner">
+            <span class="cart-icon">🛒</span>
+            <span class="cart-title">Кошик</span>
+        </div>
+        <span id="floatingCartCount" class="badge-count">0</span>
+    </div>
+
+    <!-- Затемнення фону при відкритті кошика -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+    <!-- Виїзна панель кошика -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h2>Ваше замовлення</h2>
+            <button class="close-cart-btn" onClick="closeCart()">&times;</button>
+        </div>
+
+        <!-- Список обраних товарів -->
+        <div class="cart-items" id="cartItemsList">
+            <p class="empty-cart-msg">Кошик порожній</p> 
+        </div>
+
+        <!-- Перемикач типу доставки -->
+        <div class="delivery-toggle">
+            <button type="button" id="btnDelivery" class="active" onClick="setDeliveryType('Delivery')">Доставка</button>
+            <button type="button" id="btnPickup" onClick="setDeliveryType('Pickup')">Самовивіз</button>
+        </div>
+
+        <!-- Поля адреси доставки -->
+        <div id="addressFields">
+            <div class="form-group">
+                <label>Адреса доставки</label>
+                <input type="text" id="inputAddress" placeholder="вул. Хрещатик, 1" oninput="validateForm()"/>
+            </div>
+            <div class="form-group">
+                <label>Квартира / Офіс</label>
+                <input type="text" id="inputApartment" placeholder="12" />
+            </div>
+        </div>
+
+        <!-- Час доставки та контакти -->
+        <div class="form-group">
+            <label>Коли доставити</label>
+            <select id="selectTime" onchange="validateForm()">
+                <option value="">Оберіть час</option>
+                <option value="Сьогодні, 14:00-16:00">Сьогодні, 14:00-16:00</option>
+                <option value="Сьогодні, 16:00-18:00">Сьогодні, 16:00-18:00</option>
+                <option value="Завтра, 14:00-16:00">Завтра, 14:00-16:00</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Телефон отримувача</label>
+            <input type="tel" id="inputPhone" placeholder="+380 (99) 000-00-00" oninput="validateForm()"/>
+        </div>
+
+        <div class="form-group">
+            <label>Спосіб оплати</label>
+            <select id="selectPayment" onchange="validateForm()">
+                <option value="Онлайн карткою">Онлайн карткою</option>
+                <option value="Готівкою при отриманні">Готівкою при отриманні</option>
+            </select>
+        </div>
+
+        <!-- Підсумковий розрахунок вартість -->
+        <div class="cart-summary">
+            <div class="cart-summary-row">
+                <span>Десерти</span>
+                <span id="summaryItemsPrice">0 $</span>
+            </div>
+            <div class="cart-summary-row" id="deliveryFeeRow">
+                <span>Доставка</span>
+                <span id="summaryDeliveryFee">250 $</span>
+            </div>
+            <div class="cart-total-row">
+                <span>Разом</span>
+                <span id="summaryTotalPrice">0 $</span>
+            </div>
+        </div>
+
+        <button type="button" class="checkout" id="btnCheckout" disabled onclick="submitOrder()">
+            Оформити замовлення
+        </button>
+    </div>
+
+    <!-- Модальне вікно успішного замовлення -->
+    <div class="cart-overlay" id="successOverlay"></div>
+    <div class="modal-success" id="successModal">
+        <div class="modal-success-icon">🎉</div>
+        <h3>Замовлення успішно створено!</h3>
+        <p class="modal-success-text">Дякуємо за покупку! Ми вже почали готувати ваші десерти.</p>
+        <button class="add-btn btn-full" onclick="closeSuccessModal()">Чудово</button>
+    </div>
+</div>
+
+<!-- Модальне вікно вимоги авторизації -->
+<div class="cart-overlay" id="authOverlay" onclick="closeAuthModal()"></div>
+<div class="modal-success" id="authModal" style="display: none;">
+    <h3 class="auth-modal-title">Потрібна авторизація</h3>
+    <p class="modal-success-text">Будь ласка, увійдіть у систему або зареєструйтеся, щоб завершити оформлення замовлення.</p>
+    <div class="auth-modal-actions">
+        <a href="/Login" class="add-btn auth-btn-login">Увійти</a>
+        <button class="continue-shopping-btn" onclick="closeAuthModal()">Скасувати</button>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+    // Ініціалізація стану кошика з LocalStorage
+    let cart = JSON.parse(localStorage.getItem('dessert_cart') || '[]');
+    let deliveryType = 'Delivery';
+    const deliveryFee = 250;
+
+    // Відновлення інтерфейсу після завантаження сторінки
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCardsUI();
+        updateFloatingCartBtn();
+    });
+
+    // Відкриття та закриття бічної панелі кошика
+    function openCart() {
+        document.getElementById('cartDrawer').classList.add('open');
+        document.getElementById('cartOverlay').classList.add('active');
+    }
+
+    function closeCart() {
+        document.getElementById('cartDrawer').classList.remove('open');
+        document.getElementById('cartOverlay').classList.remove('active');
+    }
+
+    // Зміна типу доставки (доставка / самовивіз)
+    function setDeliveryType(type) {
+        deliveryType = type;
+        const btnDelivery = document.getElementById('btnDelivery');
+        const btnPickup = document.getElementById('btnPickup');
+        const addressFields = document.getElementById('addressFields');
+        const deliveryFeeRow = document.getElementById('deliveryFeeRow');
+
+        if (type === 'Delivery') {
+            btnDelivery.classList.add('active');
+            btnPickup.classList.remove('active');
+            addressFields.style.display = 'block';
+            deliveryFeeRow.style.display = 'flex';
+        } else {
+            btnDelivery.classList.remove('active');
+            btnPickup.classList.add('active');
+            addressFields.style.display = 'none';
+            deliveryFeeRow.style.display = 'none';
+        }
+        renderCart();
+        validateForm();
+    }
+
+    // Збереження кошика та оновлення лічильників
+    function saveCartToStorage() {
+        localStorage.setItem('dessert_cart', JSON.stringify(cart));
+        updateFloatingCartBtn();
+    }
+
+    function updateFloatingCartBtn() {
+        const floatingBtn = document.getElementById('floatingCartBtn');
+        const floatingCount = document.getElementById('floatingCartCount');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        if (totalItems > 0) {
+            floatingBtn.style.display = 'flex';
+            floatingCount.innerText = totalItems;
+        } else {
+            floatingBtn.style.display = 'none';
+        }
+    }
+
+    // Додавання товару в кошик
+    function addToCart(id) {
+        const card = document.querySelector(`.card[data-id="${id}"]`);
+        const name = card.dataset.name;
+        const price = parseFloat(card.dataset.price);
+
+        const existing = cart.find(x => x.id === id);
+        if (existing) {
+            existing.quantity++;
+        } else {
+            cart.push({ id, name, price, quantity: 1 });
+        }
+
+        saveCartToStorage();
+        updateCardsUI();
+        renderCart();
+        openCart();
+    }
+
+    // Зміна кількості товару (+/-)
+    function changeQuantity(id, delta) {
+        const item = cart.find(x => x.id === id);
+        if (!item) return;
+
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            cart = cart.filter(x => x.id !== id);
+        }
+
+        saveCartToStorage();
+        updateCardsUI();
+        renderCart();
+    }
+
+    // Оновлення стану кнопок на картках каталогу
+    function updateCardsUI() {
+        document.querySelectorAll('.card').forEach(card => {
+            const id = parseInt(card.dataset.id);
+            const actionZone = card.querySelector('.action-zone');
+            const item = cart.find(x => x.id === id);
+
+            if (item && item.quantity > 0) {
+                actionZone.innerHTML = `
+                    <div class="counter-btn-group">
+                        <button type="button" onClick="changeQuantity(${id}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button type="button" onClick="changeQuantity(${id}, 1)">+</button>
+                    </div> 
+                `;
+            } else {
+                actionZone.innerHTML = `
+                    <button class="add-btn" onclick="addToCart(${id})">
+                        До кошика
+                    </button>
+                `;
+            }
+        });
+    }
+
+    // Отрисовка списку товарів у кошику та перерахунок суми
+    function renderCart() {
+        const list = document.getElementById('cartItemsList');
+        if (cart.length === 0) {
+            list.innerHTML = '<p class="empty-cart-msg">Кошик порожній</p>';
+            document.getElementById('summaryItemsPrice').innerText = '0 $';
+            document.getElementById('summaryTotalPrice').innerText = '0 $';
+            document.getElementById('btnCheckout').innerText = 'Оформити замовлення';
+            validateForm();
+            return;
+        }
+
+        let itemsHtml = '';
+        let itemsTotal = 0;
+
+        cart.forEach(item => {
+            const total = item.price * item.quantity;
+            itemsTotal += total;
+
+            itemsHtml += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${item.name}</span> 
+                        <span class="cart-item-details">${item.quantity} шт. × ${item.price} $</span>
+                    </div>
+                    <div class="cart-item-right">
+                        <span class="cart-item-price">${total} $</span>
+                        <button type="button" class="delete-btn" onClick="changeQuantity(${item.id}, -${item.quantity})">🗑</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        list.innerHTML = itemsHtml;
+
+        const currentDeliveryFee = deliveryType === 'Delivery' ? deliveryFee : 0;
+        const grandTotal = itemsTotal + currentDeliveryFee;
+
+        document.getElementById('summaryItemsPrice').innerText = `${itemsTotal} $`;
+        document.getElementById('summaryDeliveryFee').innerText = `${currentDeliveryFee} $`;
+        document.getElementById('summaryTotalPrice').innerText = `${grandTotal} $`;
+        document.getElementById('btnCheckout').innerText = `Оформити замовлення на ${grandTotal} $`;
+
+        validateForm();
+    }
+
+    // Валідація форми кошика
+    function validateForm() {
+        const btn = document.getElementById('btnCheckout');
+        if (cart.length === 0) {
+            btn.disabled = true;
+            return;
+        }
+
+        const time = document.getElementById('selectTime').value.trim();
+        const phone = document.getElementById('inputPhone').value.trim();
+        let isValid = time !== '' && phone.length >= 9;
+
+        if (deliveryType === 'Delivery') {
+            const address = document.getElementById('inputAddress').value.trim();
+            if (address === '') isValid = false;
+        }
+
+        btn.disabled = !isValid;
+    }
+
+    // Відправка замовлення на сервер
+    async function submitOrder() {
+        const dto = {
+            deliveryType: deliveryType,
+            address: deliveryType === 'Delivery' ? document.getElementById('inputAddress').value : '',
+            apartment: document.getElementById('inputApartment').value,
+            deliveryTime: document.getElementById('selectTime').value,
+            phone: document.getElementById('inputPhone').value,
+            paymentMethod: document.getElementById('selectPayment').value,
+            items: cart
+        };
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        try {
+            const response = await fetch('?handler=CreateOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(dto)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                cart = [];
+                saveCartToStorage();
+                updateCardsUI();
+                renderCart();
+                closeCart();
+
+                document.getElementById('successModal').classList.add('show');
+                document.getElementById('successOverlay').classList.add('active');
+            } else {
+                if (result.message && result.message.includes('увійдіть')) {
+                    closeCart();
+                    openAuthModal();
+                } else {
+                    alert(result.message || 'Помилка при створенні замовлення');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Помилка з\'єднання з сервером: ' + err.message);
+        }
+    }
+
+    // Модальні вікна авторизації та успіху
+    function openAuthModal() {
+        document.getElementById('authModal').style.display = 'block';
+        document.getElementById('authModal').classList.add('show');
+        document.getElementById('authOverlay').classList.add('active');
+    }
+
+    function closeAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+        document.getElementById('authModal').classList.remove('show');
+        document.getElementById('authOverlay').classList.remove('active');
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('successModal').classList.remove('show');
+        window.location.reload();
+    }
+</script>

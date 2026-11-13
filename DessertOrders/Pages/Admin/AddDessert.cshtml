@@ -1,0 +1,153 @@
+﻿@page
+@model DessertOrders.Pages.Admin.AddDessertModel
+@{
+    ViewData["Title"] = "Додати десерт";
+}
+
+<div class="admin-page-header">
+    <div>
+        <h1>Нова солодка історія</h1>
+        <p>Додайте десерт до вітрини. Клієнти побачать його після публікації.</p>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="add-product-grid">
+        
+        <!-- Левая колонка: Все карточки с полями ввода -->
+        <div class="add-product-form-column">
+            
+            <!-- Основная информация -->
+            <div class="admin-card-box">
+                <h3>Основна інформація</h3>
+                
+                <div class="form-group-admin">
+                    <label>Назва десерту *</label>
+                    <input type="text" asp-for="Dessert.Name" id="inputName" class="admin-text-input" placeholder="Наприклад: Лимонна хмарка" />
+                </div>
+
+                <div class="form-group-admin">
+                    <label>Категорія *</label>
+                    <select asp-for="Dessert.Category" class="admin-select-input">
+                        <option value="Тістечка">Тістечка</option>
+                        <option value="Чізкейки">Чізкейки</option>
+                        <option value="Печиво">Печиво</option>
+                        <option value="Десерти">Десерти</option>
+                    </select>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group-admin">
+                        <label>Ціна ($) *</label>
+                        <input type="number" asp-for="Dessert.Price" id="inputPrice" class="admin-text-input" value="0" />
+                    </div>
+                    <div class="form-group-admin">
+                        <label>Вага (г) *</label>
+                        <input type="number" asp-for="Dessert.Weight" class="admin-text-input" value="0" />
+                    </div>
+                    <div class="form-group-admin">
+                        <label>Залишок (шт.) *</label>
+                        <input type="number" asp-for="Dessert.Stock" class="admin-text-input" value="0" />
+                    </div>
+                </div>
+
+                <div class="form-group-admin">
+                    <label>Опис для вітрини *</label>
+                    <textarea asp-for="Dessert.Description" id="inputDesc" class="admin-textarea-input" placeholder="Легкий мус, ніжний крем..."></textarea>
+                </div>
+            </div>
+
+            <!-- Склад та особливості -->
+            <div class="admin-card-box">
+                <h3>Склад та особливості</h3>
+                <div class="form-group-admin">
+                    <label>Інгредієнти *</label>
+                    <textarea asp-for="Dessert.Ingredients" class="admin-textarea-input" placeholder="Вершки 33%, лимон, вершкове масло..."></textarea>
+                </div>
+            </div>
+
+            <!-- Публикация -->
+            <div class="admin-card-box">
+                <h3>Публікація</h3>
+                <div class="form-group-row-flex">
+                    <div>
+                        <div class="toggle-title">Доступний для замовлення</div>
+                        <div class="toggle-sub">Після публікації десерт можна додати до кошика.</div>
+                    </div>
+                    <input type="checkbox" asp-for="Dessert.IsAvailable" class="admin-toggle-checkbox" />
+                </div>
+                <button type="submit" class="publish-btn">Опублікувати десерт</button>
+            </div>
+
+        </div>
+
+        <!-- Правая колонка: Загрузка фото и Живое превью -->
+        <div class="add-product-preview-column">
+            
+            <!-- Блок загрузки фото -->
+            <div class="admin-card-box">
+                <h3>Фотографія *</h3>
+                <div class="upload-box">
+                    <label class="upload-label" for="fileInput">Вибрати файл</label>
+                    <input type="file" id="fileInput" name="ImageFile" style="display: none;" accept="image/*" />
+                    <div class="upload-hint">JPG або PNG, до 10 МБ.</div>
+                </div>
+            </div>
+
+            <!-- Блок превью -->
+            <div class="preview-container">
+                <div class="preview-header-label">Так побачить клієнт</div>
+                <div class="preview-card-mockup">
+                    <img id="previewImg" src="/images/placeholder.jpg" class="preview-img" alt="Превью" />
+                    <div class="preview-content">
+                        <div class="preview-title">Назва десерту</div>
+                        <div class="preview-desc">Опис десерту з'явиться тут...</div>
+                        <div class="preview-footer">
+                            <span class="preview-price">0 $</span>
+                            <span class="preview-badge-cart">До кошика</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        const inputName = document.getElementById('inputName');
+        const inputPrice = document.getElementById('inputPrice');
+        const inputDesc = document.getElementById('inputDesc');
+        const fileInput = document.getElementById('fileInput');
+
+        const previewTitle = document.querySelector('.preview-title');
+        const previewPrice = document.querySelector('.preview-price');
+        const previewDesc = document.querySelector('.preview-desc');
+        const previewImg = document.getElementById('previewImg');
+
+        inputName.addEventListener('input', (e) => {
+            previewTitle.textContent = e.target.value.trim() || 'Назва десерту';
+        });
+
+        inputPrice.addEventListener('input', (e) => {
+            previewPrice.textContent = (e.target.value || '0') + ' $';
+        });
+
+        inputDesc.addEventListener('input', (e) => {
+            previewDesc.textContent = e.target.value.trim() || "Опис десерту з'явиться тут...";
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImg.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

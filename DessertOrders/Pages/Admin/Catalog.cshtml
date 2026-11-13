@@ -1,0 +1,375 @@
+﻿@page
+@model DessertOrders.Pages.Admin.CatalogModel
+
+<div class="admin-catalog-container">
+    <div class="catalog-top-header">
+        <div>
+            <h1>Наша солодка вітрина</h1>
+            <p style="color: #666; font-size: 14px;">Керуйте асортиментом, цінами та доступністю улюблених десертів.</p>
+        </div>
+        <a href="/Admin/AddDessert" class="add-dessert-btn">+ Додати десерт</a>
+    </div>
+
+    <!-- Блок статистики -->
+    <div class="stats-cards-grid">
+        <div class="stat-card">
+            <span>Усього десертів</span>
+            <h2>@Model.TotalCount</h2>
+            <small>У вашому каталозі</small>
+        </div>
+        <div class="stat-card">
+            <span>У продажу</span>
+            <h2>@Model.ActiveCount</h2>
+            <small>Доступні для замовлення</small>
+        </div>
+        <div class="stat-card">
+            <span>Немає в наявності</span>
+            <h2>@Model.OutOfStockCount</h2>
+            <small>Потрібно поновити запас</small>
+        </div>
+        <div class="stat-card">
+            <span>Зняті з продажу</span>
+            <h2>@Model.DiscontinuedCount</h2>
+            <small>Приховані з вітрини</small>
+        </div>
+    </div>
+
+    <!-- Пошук та фільтри -->
+    <div class="filter-toolbar">
+        <div class="search-box">
+            <input type="text" placeholder="Пошук за назвою десерту" id="searchInput" oninput="filterDesserts()" />
+        </div>
+        <select id="categoryFilter" class="filter-select" onchange="filterDesserts()">
+            <option value="">Усі категорії</option>
+            <option value="Тістечка">Тістечка</option>
+            <option value="Торти">Торти</option>
+            <option value="Набори">Набори</option>
+        </select>
+        <select id="sortFilter" class="filter-select" onchange="filterDesserts()">
+            <option value="popularity">За популярністю</option>
+            <option value="price-asc">Від дешевих до дорогих</option>
+            <option value="price-desc">Від дорогих до дешевих</option>
+        </select>
+    </div>
+
+    <!-- Таби-статуси -->
+    <div class="status-tabs">
+        <button class="tab-btn active" onclick="filterByStatus('all')">Усі - @Model.TotalCount</button>
+        <button class="tab-btn" onclick="filterByStatus('active')">У продажу - @Model.ActiveCount</button>
+        <button class="tab-btn" onclick="filterByStatus('outofstock')">Немає в наявності - @Model.OutOfStockCount</button>
+        <button class="tab-btn" onclick="filterByStatus('discontinued')">Зняті з продажу - @Model.DiscontinuedCount</button>
+    </div>
+
+    <!-- Сітка карток товарів -->
+    <div class="admin-cards-grid" id="adminCardsGrid">
+        @foreach (var dessert in Model.Desserts)
+        {
+            <div class="admin-card" 
+                 data-id="@dessert.Id" 
+                 data-name="@dessert.Name.ToLower()" 
+                 data-category="@dessert.Category" 
+                 data-price="@dessert.Price" 
+                 data-status="@dessert.Status">
+                <div class="admin-card-image-wrapper">
+                    <img src="@dessert.ImageUrl" alt="@dessert.Name" />
+                    @if (dessert.Status == "Active")
+                    {
+                        <span class="status-badge active">У продажу</span>
+                    }
+                    else if (dessert.Status == "OutOfStock")
+                    {
+                        <span class="status-badge warning">Немає в наявності</span>
+                    }
+                    else
+                    {
+                        <span class="status-badge discontinued">Знятий з продажу</span>
+                    }
+                </div>
+
+                <div class="admin-card-body">
+                    <div class="card-meta">
+                        <span>@dessert.Category</span>
+                        <span>@dessert.Weight г · 1 порція</span>
+                    </div>
+                    <h3>@dessert.Name</h3>
+                    <div class="card-price-stock">
+                        <span class="price">@dessert.Price ₴</span>
+                        <span class="stock">Залишок: @dessert.Stock шт.</span>
+                    </div>
+                    <div class="card-actions">
+                        <button onclick="openEditModal(@dessert.Id, '@dessert.Name', '@dessert.Category', @dessert.Price, @dessert.Stock, @dessert.Weight, '@dessert.ImageUrl')" class="btn-edit">✎ Змінити</button>
+                        @if (dessert.Status != "Discontinued")
+                        {
+                            <button onclick="changeStatus(@dessert.Id, 'Discontinued')" class="btn-action-outline">Зняти з продажу</button>
+                        }
+                        else
+                        {
+                            <button onclick="changeStatus(@dessert.Id, 'Active')" class="btn-action-outline">Повернути в продаж</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="admin-footer-note">
+        <small>💡 Зняті з продажу десерти залишаються в каталозі, але не відображаються клієнтам. Їх можна повернути в продаж будь-коли.</small>
+    </div>
+</div>
+
+<!-- Модальне вікно підтвердження зміни статусу -->
+<div class="cart-overlay" id="confirmOverlay" onclick="closeConfirmModal()" style="display: none;"></div>
+<div class="modal-success" id="confirmModal" style="display: none; text-align: center;">
+    <div class="success-icon" style="font-size: 32px; margin-bottom: 10px;">⚠️</div>
+    <h3 id="confirmTitle" style="color: #2b2b2b; margin-top: 0;">Зміна статусу</h3>
+    <p id="confirmText" style="color: #666; font-size: 14px; margin-bottom: 20px;">Ви дійсно хочете змінити статус цього десерту?</p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" id="confirmActionBtn" class="add-btn" style="background-color: #c83753; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white;">Так, змінити</button>
+        <button type="button" class="continue-shopping-btn" onclick="closeConfirmModal()" style="background: #f5f2ed; border: 1px solid #ddd; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Скасувати</button>
+    </div>
+</div>
+
+<!-- Модальне вікно редагування десерту -->
+<div class="cart-overlay" id="editOverlay" onclick="closeEditModal()" style="display: none;"></div>
+<div class="modal-success" id="editModal" style="display: none; width: 450px; max-width: 90%; text-align: left; padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: #2b2b2b; font-size: 20px;">Редагувати десерт</h3>
+        <button class="close-cart-btn" onclick="closeEditModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+    </div>
+
+    <form id="editDessertForm" onsubmit="saveDessert(event)">
+        <input type="hidden" id="editId" />
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Назва десерту</label>
+            <input type="text" id="editName" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div class="form-group" style="flex: 1;">
+                <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Категорія</label>
+                <select id="editCategory" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="Тістечка">Тістечка</option>
+                    <option value="Торти">Торти</option>
+                    <option value="Набори">Набори</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Ціна (₴ / $)</label>
+                <input type="number" step="0.01" id="editPrice" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div class="form-group" style="flex: 1;">
+                <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Залишок (шт.)</label>
+                <input type="number" id="editStock" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Вага (г)</label>
+                <input type="number" id="editWeight" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" />
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Посилання на фото (URL)</label>
+            <input type="text" id="editImageUrl" class="profile-input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" />
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="continue-shopping-btn" onclick="closeEditModal()" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #ddd; background: #f5f2ed; cursor: pointer;">Скасувати</button>
+            <button type="submit" class="add-btn" style="padding: 10px 20px; border-radius: 8px; background: #c83753; color: white; border: none; cursor: pointer;">Зберегти зміни</button>
+        </div>
+    </form>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+    let currentStatus = 'all';
+    let pendingDessertId = null;
+    let pendingNewStatus = null;
+
+    function filterByStatus(status) {
+        currentStatus = status;
+        document.querySelectorAll('.status-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        applyFiltersAndSort();
+    }
+
+    function filterDesserts() {
+        applyFiltersAndSort();
+    }
+
+    function applyFiltersAndSort() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+        const selectedCategory = document.getElementById('categoryFilter').value;
+        const sortValue = document.getElementById('sortFilter').value;
+
+        const grid = document.getElementById('adminCardsGrid');
+        let cards = Array.from(grid.getElementsByClassName('admin-card'));
+
+        // 1. Фільтрація
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            const category = card.dataset.category || '';
+            const status = (card.dataset.status || '').toLowerCase();
+
+            let matchesSearch = name.includes(searchQuery);
+            let matchesCategory = !selectedCategory || category === selectedCategory;
+            let matchesStatus = (currentStatus === 'all') || (status === currentStatus);
+
+            if (matchesSearch && matchesCategory && matchesStatus) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // 2. Сортування видимих карток
+        let visibleCards = cards.filter(card => card.style.display !== 'none');
+
+        visibleCards.sort((a, b) => {
+            const priceA = parseFloat(a.dataset.price || 0);
+            const priceB = parseFloat(b.dataset.price || 0);
+
+            if (sortValue === 'price-asc') {
+                return priceA - priceB;
+            } else if (sortValue === 'price-desc') {
+                return priceB - priceA;
+            } else {
+                const idA = parseInt(a.dataset.id || 0);
+                const idB = parseInt(b.dataset.id || 0);
+                return idA - idB;
+            }
+        });
+
+        visibleCards.forEach(card => grid.appendChild(card));
+    }
+
+    function changeStatus(id, newStatus) {
+        pendingDessertId = id;
+        pendingNewStatus = newStatus;
+
+        const titleEl = document.getElementById('confirmTitle');
+        const textEl = document.getElementById('confirmText');
+        const modal = document.getElementById('confirmModal');
+        const overlay = document.getElementById('confirmOverlay');
+
+        if (newStatus === 'Discontinued') {
+            titleEl.innerText = 'Зняти з продажу?';
+            textEl.innerText = 'Цей десерт буде прихований з вітрини для клієнтів.';
+        } else {
+            titleEl.innerText = 'Повернути в продаж?';
+            textEl.innerText = 'Цей десерт знову з`явиться на вітрині для замовлення.';
+        }
+
+        modal.style.display = 'block';
+        overlay.style.display = 'block';
+        
+        setTimeout(() => {
+            modal.classList.add('show');
+            overlay.classList.add('active');
+        }, 10);
+    }
+
+    document.getElementById('confirmActionBtn').onclick = function() {
+        if (pendingDessertId === null || pendingNewStatus === null) return;
+
+        fetch(`?handler=UpdateStatus&id=${pendingDessertId}&status=${pendingNewStatus}`, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        }).then(res => {
+            if(res.ok) window.location.reload();
+        });
+    };
+
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        const overlay = document.getElementById('confirmOverlay');
+
+        modal.classList.remove('show');
+        overlay.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+            pendingDessertId = null;
+            pendingNewStatus = null;
+        }, 200);
+    }
+
+    function openEditModal(id, name, category, price, stock, weight, imageUrl) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editCategory').value = category;
+        document.getElementById('editPrice').value = price;
+        document.getElementById('editStock').value = stock;
+        document.getElementById('editWeight').value = weight;
+        document.getElementById('editImageUrl').value = imageUrl;
+
+        const modal = document.getElementById('editModal');
+        const overlay = document.getElementById('editOverlay');
+
+        modal.style.display = 'block';
+        overlay.style.display = 'block';
+
+        setTimeout(() => {
+            modal.classList.add('show');
+            overlay.classList.add('active');
+        }, 10);
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editModal');
+        const overlay = document.getElementById('editOverlay');
+
+        modal.classList.remove('show');
+        overlay.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+        }, 200);
+    }
+
+    async function saveDessert(event) {
+        event.preventDefault();
+
+        const dto = {
+            id: parseInt(document.getElementById('editId').value),
+            name: document.getElementById('editName').value,
+            category: document.getElementById('editCategory').value,
+            price: parseFloat(document.getElementById('editPrice').value),
+            stock: parseInt(document.getElementById('editStock').value),
+            weight: parseInt(document.getElementById('editWeight').value || 0),
+            imageUrl: document.getElementById('editImageUrl').value
+        };
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        try {
+            const response = await fetch('?handler=UpdateDessert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(dto)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                closeEditModal();
+                window.location.reload();
+            } else {
+                alert(result.message || 'Помилка при оновленні десерту');
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Помилка з'єднання з сервером");
+        }
+    }
+</script>

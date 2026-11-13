@@ -1,0 +1,55 @@
+﻿@page
+@model DessertOrders.Pages.LoginModel
+@{
+    ViewData["Title"] = "Вхід";
+}
+
+<div class="page">
+    <main class="content">
+        <!-- Ліва промо-колонка з фоновим зображенням та слоганом -->
+        <div class="left">
+            <img src="~/images/images-1.jfif" alt="Десерт">
+            <div class="overlay"></div>
+            <div class="brand-text">
+                <h2>З поверненням!</h2>
+                <p>Увійдіть у свій акаунт, щоб керувати замовленнями та насолоджуватися улюбленими десертами.</p>
+            </div>
+        </div>
+
+        <!-- Права колонка з формою входу -->
+        <div class="right">
+            <span class="small-title">З ДОБРИМ ДНЕМ</span>
+            <h1>Раді бачити вас знову</h1>
+            <p class="description">
+                Введіть свої дані для входу в особистий кабінет.
+            </p>
+
+            <form method="post">
+                <!-- Валідація загальних помилок авторизації (наприклад, невірний пароль) -->
+                <div asp-validation-summary="ModelOnly" class="alert-value" style="font-size: 13px; margin-bottom: 15px;"></div>
+
+                <div class="form-group">
+                    <label>Електронна пошта</label>
+                    <input type="email" asp-for="Input.Email" placeholder="example@gmail.com" autocomplete="email" />
+                    <span asp-validation-for="Input.Email" class="alert-value" style="font-size: 12px;"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" asp-for="Input.Password" autocomplete="current-password" />
+                    <span asp-validation-for="Input.Password" class="alert-value" style="font-size: 12px;"></span>
+                </div>
+
+                <button type="submit">Увійти</button>
+
+                <div class="form-footer-text">
+                    Ще не з нами? <a asp-page="/Index">Реєстрація</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div>© 2026 Крихітка. Зроблено з любов'ю.</div>
+    </footer>
+</div>

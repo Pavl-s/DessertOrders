@@ -1,0 +1,169 @@
+﻿@page
+@model DessertOrders.Pages.Admin.ClientsModel
+@{
+    ViewData["Title"] = "Наші гості";
+}
+
+<div class="admin-catalog-container">
+    <!-- Верхня шапка сторінки -->
+    <div class="catalog-top-header">
+        <div>
+            <h1>Наші гості</h1>
+            <p>За кожним замовленням — людина. Тут усе, щоб пам'ятати її вподобання.</p>
+        </div>
+    </div>
+
+    <!-- Картки статистики -->
+    <div class="stats-cards-grid">
+        <div class="stat-card">
+            <span>Усього клієнтів</span>
+            <h2>@Model.TotalClientsCount</h2>
+            <small>Разом із нами</small>
+        </div>
+        <div class="stat-card">
+            <span>Замовляли в місяці</span>
+            <h2>@Model.ActiveThisMonthCount</h2>
+            <small>Активних гостей за місяць</small>
+        </div>
+        <div class="stat-card">
+            <span>Нові сьогодні</span>
+            <h2>@Model.NewTodayCount</h2>
+            <small>Ласкаво просимо!</small>
+        </div>
+    </div>
+
+    <!-- Основний контент (Дві колонки: Список ліворуч, Деталі праворуч) -->
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: start;">
+        
+        <!-- ЛІВА КОЛОНКА: Пошук та таблиця клієнтів -->
+        <div class="admin-card-box" style="padding: 20px;">
+            <div class="filter-toolbar" style="margin-bottom: 20px;">
+                <div class="search-box">
+                    <input type="text" id="clientSearch" placeholder="Пошук за ім'ям, телефоном або поштою" oninput="filterClients()" />
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="admin-table" id="clientsTable">
+                    <thead>
+                        <tr>
+                            <th>Клієнт</th>
+                            <th style="text-align: center;">К-сть</th>
+                            <th style="text-align: right;">Сума</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in Model.Clients)
+                        {
+                            <tr onclick="location.href='?selectedUserId=@client.Id'" 
+                                class="order-row-item client-row @(Model.SelectedClient?.Id == client.Id ? "active-row" : "")" 
+                                data-search="@client.Name.ToLower() @client.Email.ToLower() @client.Phone">
+                                <td style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 38px; height: 38px; background: #fdf2f4; color: #c83753; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0;">
+                                        @client.Initials
+                                    </div>
+                                    <div>
+                                        <div class="client-name-txt">@client.Name</div>
+                                        <div class="order-date-txt">@client.Email</div>
+                                        <div style="font-size: 11px; color: #aaa;">@client.Phone</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-weight: 500; color: #444;">@client.OrdersCount</td>
+                                <td style="text-align: right; font-weight: 600; color: #2b2b2b;">@client.TotalSpent $</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ПРАВА КОЛОНКА: Деталі вибраного клієнта -->
+        @if (Model.SelectedClient != null)
+        {
+            <div class="order-details-sidebar-card">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="width: 50px; height: 50px; background: #fdf2f4; color: #c83753; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
+                        @Model.SelectedClient.Initials
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 20px; color: #2b2b2b;">@Model.SelectedClient.Name</h3>
+                        <span class="status-badge badge-new" style="margin-top: 4px;">Постійний гість</span>
+                    </div>
+                </div>
+
+                <div class="details-sub-date" style="margin-bottom: 20px;">
+                    З нами з @Model.SelectedClient.CreatedAt.ToString("dd MMMM yyyy")
+                </div>
+
+                <div class="details-section-box" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div>📞 <a href="tel:@Model.SelectedClient.Phone" style="color: #c83753; text-decoration: none;">@Model.SelectedClient.Phone</a></div>
+                    <div>✉️ <a href="mailto:@Model.SelectedClient.Email" style="color: #666; text-decoration: none;">@Model.SelectedClient.Email</a></div>
+                </div>
+
+                <!-- Міні-статистика клієнта -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 25px; background: #faf8f5; padding: 15px; border-radius: 12px; border: 1px solid #eae5df;">
+                    <div>
+                        <div style="font-size: 18px; font-weight: bold; color: #2b2b2b;">@Model.SelectedClient.OrdersCount</div>
+                        <div style="font-size: 11px; color: #888;">замовлення</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: bold; color: #2b2b2b;">@Model.SelectedClient.TotalSpent $</div>
+                        <div style="font-size: 11px; color: #888;">усього покупок</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: bold; color: #2b2b2b;">@Model.SelectedClient.AverageCheck $</div>
+                        <div style="font-size: 11px; color: #888;">середній чек</div>
+                    </div>
+                </div>
+
+                <h4 class="items-title-heading" style="font-size: 15px; margin-bottom: 15px;">Історія замовлень</h4>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    @foreach (var order in Model.SelectedClient.Orders)
+                    {
+                        <div style="border: 1px solid #eae5df; border-radius: 12px; padding: 15px; font-size: 13px; background: white;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600;">
+                                <span class="order-id-txt">Замовлення #@order.Id — @order.CreatedAt.ToString("dd MMMM")</span>
+                                <span style="color: #2b2b2b;">@order.TotalAmount $</span>
+                            </div>
+                            <div style="font-size: 11px; color: #888; margin-bottom: 10px;">
+                                Статус: <span class="status-badge badge-done" style="font-weight: 500;">@order.Status</span> · @order.DeliveryType
+                            </div>
+                            <div style="border-top: 1px dashed #eae5df; padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                @foreach (var item in order.Items)
+                                {
+                                    <div class="item-row-line" style="margin-bottom: 0;">
+                                        <span>@item.DessertName × @item.Quantity</span>
+                                        <span>@(item.Price * item.Quantity) $</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="admin-card-box select-order-placeholder">
+                Оберіть клієнта зі списку ліворуч, щоб переглянути деталі.
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterClients() {
+        const query = document.getElementById('clientSearch').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.client-row');
+
+        rows.forEach(row => {
+            const text = row.getAttribute('data-search') || '';
+            if (text.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>

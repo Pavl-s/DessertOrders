@@ -1,29 +1,37 @@
-{
-    box-sizing:border-box;
+/* ==========================================================================
+   1. ¡¿«Œ¬≤ —“¿Õƒ¿–“» “¿ — ≤Õ≈“»
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
 }
 
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    min-height: 100%
+    min-height: 100%;
 }
 
 body {
-    background: #faf7f0;
+    background: #faf7f0; /* “ÂÔÎËÈ ÍÂÏÓ‚ËÈ Ù≥ÏÓ‚ËÈ ÙÓÌ */
     overflow-x: hidden;
-    font-family:'Lora', serif;
+    font-family: 'Lora', serif;
 }
 
+/* ==========================================================================
+   2.  ŒÕ“≈…Õ≈– —“Œ–≤Õ » “¿ ÿ¿œ ¿
+   ========================================================================== */
+
 .page {
-    width:100%;
-    max-width:1440px;
+    width: 100%;
+    max-width: 1440px;
     margin: 0 auto;
-    padding:0;
+    padding: 0;
     min-height: 100vh;
     display: flex;
-    flex-direction:column;
-    position:relative;
+    flex-direction: column;
+    position: relative;
 }
 
 .header {
@@ -37,12 +45,12 @@ body {
 }
 
 .logo h1 {
-    display:flex;
-    flex-direction:column;
-    gap:3px;
-    color: #C33149;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: #C33149; /* ‘≥ÏÓ‚ËÈ ‚Ë¯ÌÂ‚ËÈ ÍÓÎ≥ */
     font-size: 36px;
-    font-weight:400;
+    font-weight: 400;
     margin: 0;
 }
 
@@ -52,13 +60,17 @@ body {
     font-family: sans-serif;
 }
 
+/* ==========================================================================
+   3.  ŒÕ“≈Õ“Õ»… ¡ÀŒ  “¿ ‘Œ–Ã» ¿¬“Œ–»«¿÷≤Ø
+   ========================================================================== */
+
 .content {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: center;
     padding: 40px clamp(20px, 4.5vw, 64px);
     gap: clamp(24px, 5vw, 80px);
-    flex:1;
+    flex: 1;
 }
 
 .left {
@@ -66,58 +78,54 @@ body {
     flex: 1 1 608px;
     min-width: 0;
     max-width: 608px;
-    height: clamp(400px, 52vw, 748px);
     overflow: hidden;
     border-radius: 24px;
+    display: flex;
+    flex-direction: column;
 }
 
-.left img {
-    width: 100%;
-    height: 100%;
-    object-fit:cover;
-    display:block;
-}
+    .left img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
 
 .overlay {
     position: absolute;
     inset: 0;
-    width:100%;
-    height:100%;
-    border-radius:24px;
-    background:
-        linear-gradient(
-        to bottom,
-        rgba(56,43,38,0) 40%,
-        rgba(56,43,38,0.2) 75%,
-        rgba(56,43,38,0.91) 100%);
-    pointer-events:none;
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+    background: linear-gradient(to bottom, rgba(56, 43, 38, 0) 40%, rgba(56, 43, 38, 0.2) 75%, rgba(56, 43, 38, 0.91) 100%);
+    pointer-events: none;
 }
 
-.brand-text{
-    position:absolute;
-    left:40px;
+.brand-text {
+    position: absolute;
+    left: 40px;
     right: 40px;
-    bottom:42px;
-    width:auto;
-    z-index:2;
+    bottom: 42px;
+    width: auto;
+    z-index: 2;
     color: white;
 }
 
-.brand-text h2{
-    font-size:38px;
-    line-height:120%;
-    color:white;
-    margin: 0 0 12px 0;
-    font-weight: 400;
-}
+    .brand-text h2 {
+        font-size: 38px;
+        line-height: 120%;
+        color: white;
+        margin: 0 0 12px 0;
+        font-weight: 400;
+    }
 
- .brand-text p {
+    .brand-text p {
         font-size: 14px;
         line-height: 150%;
         color: white;
         margin: 0;
         font-family: sans-serif;
- }
+    }
 
 .right {
     flex: 1 1 448px;
@@ -135,24 +143,28 @@ body {
 
 .right h1 {
     font-size: 40px;
-    line-height:115%;
-    color:#342822;
+    line-height: 115%;
+    color: #342822;
     margin: 10px 0 15px 0;
 }
 
 .description {
     color: #81756c;
-    font-size:14px;
+    font-size: 14px;
     margin-bottom: 25px;
-    line-height:160%;
+    line-height: 160%;
     font-family: sans-serif;
 }
+
+/* ==========================================================================
+   4. ≤Õœ”“»,  ÕŒœ » “¿ ≈À≈Ã≈Õ“» ‘Œ–Ã
+   ========================================================================== */
 
 form {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width:100%;
+    width: 100%;
 }
 
 label {
@@ -162,7 +174,7 @@ label {
 }
 
 input {
-    width:100%;
+    width: 100%;
     min-width: 0;
     height: 48px;
     border: 1px solid #e5ded3;
@@ -174,21 +186,21 @@ input {
     transition: border-color 0.2s;
 }
 
-input:focus{
-    border-color: #c33149;
-}
+    input:focus {
+        border-color: #c33149;
+    }
 
-.form-group{
+.form-group {
     display: flex;
     flex-direction: column;
-    gap:6px;
-    width:100%;
+    gap: 6px;
+    width: 100%;
 }
 
 .password-row {
     display: flex;
     gap: 16px;
-    width:100%;
+    width: 100%;
 }
 
 .password-field {
@@ -196,35 +208,77 @@ input:focus{
     flex-direction: column;
     gap: 6px;
     flex: 1 1 0;
-    min-width:0;
+    min-width: 0;
 }
 
 button {
-    width:100%;
+    width: 100%;
     height: 48px;
     border: 1px solid #c33149;
     border-radius: 10px;
     background: #C33149;
     color: white;
-    font-size:14px;
-    font-weight:600;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     margin-top: 8px;
     transition: background 0.2s;
 }
 
-button:hover{
-    background: #a8293e;
+    button:hover {
+        background: #a8293e;
+    }
+
+.form-footer-text {
+    text-align: center;
+    font-size: 13px;
+    color: #81756c;
+    font-family: sans-serif;
+    margin-top: 4px;
 }
 
-.footer{
-    height:64px;
+    .form-footer-text a {
+        color: #C33149;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .form-footer-text a:hover {
+            text-decoration: underline;
+        }
+
+/* ==========================================================================
+   5. Õ¿¬≤√¿÷≤ﬂ  Œ–»—“”¬¿◊¿ “¿ ‘”“≈–
+   ========================================================================== */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-profile-link {
+    color: #C33149;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: 'Lora', serif;
+    transition: color 0.2s;
+}
+
+    .user-profile-link:hover {
+        color: #a8293e;
+        text-decoration: underline;
+    }
+
+.footer {
+    height: 64px;
     padding: 0 64px;
-    border-top:1px solid #e5ded3;
-    display:flex;
-    justify-content:space-between;
+    border-top: 1px solid #e5ded3;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     font-family: sans-serif;
-    font-size:12px;
+    font-size: 12px;
     color: #81756c;
 }

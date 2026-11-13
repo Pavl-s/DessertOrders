@@ -1,25 +1,131 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - DessertOrders</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel = "preconnect" href="https://fonts.googleapis.com" />
-    <link rel = "preconnect" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap"  />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/catalog.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DessertOrders.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-    </header>
-    <div class="container">
-            @RenderBody()
-        </main>
+    @{
+        var currentPath = Context.Request.Path.Value ?? string.Empty;
+        bool isAdminPage = currentPath.Contains("/Admin", StringComparison.OrdinalIgnoreCase);
+    }
+
+    @if (isAdminPage)
+    {
+        <!-- Админский Layout с боковым меню -->
+        <div class="admin-layout-wrapper">
+            <aside class="admin-sidebar">
+                <div class="sidebar-logo">
+                    <h2>Крихта.</h2>
+                    <span>кондитерська з любов'ю</span>
+                    <div class="manager-badge">Панель менеджера</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="/Admin/Orders" class="sidebar-link @(currentPath.Contains("/Admin/Orders") ? "active" : "")">
+                        Огляд замовлень
+                    </a>
+                    <a href="/Admin/AddDessert" class="sidebar-link @(currentPath.Contains("/Admin/AddDessert") ? "active" : "")">
+                        Додати десерт
+                    </a>
+                    <a href="/Admin/Clients" class="sidebar-link @(currentPath.Contains("/Admin/Clients") ? "active" : "")">
+                        Клієнти
+                    </a>
+                    <a href="/Admin/Catalog" class="sidebar-link @(currentPath.Contains("/Admin/Catalog") ? "active" : "")">
+                        Керування каталогом
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="promo-box">
+                        <strong>Гарного дня!</strong>
+                        <p>Кожне замовлення — чиясь маленька свято.</p>
+                    </div>
+                    <a href="/Catalog" class="sidebar-bottom-link">Відкрити вітрину</a>
+                    <a href="/Profile?handler=Logout" class="sidebar-bottom-link logout">Вийти з аккаунта</a>
+                </div>
+            </aside>
+
+            <main class="admin-main-content">
+                @RenderBody()
+            </main>
+        </div>
+    }
+    else
+    {
+        <!-- Единый клиентский Layout для всех страниц сайта -->
+        <div class="page">
+            @{
+                bool isAuthPage = currentPath.Equals("/", StringComparison.OrdinalIgnoreCase) ||
+                                  currentPath.Equals("/Index", StringComparison.OrdinalIgnoreCase) ||
+                                  currentPath.Contains("/Login", StringComparison.OrdinalIgnoreCase) || 
+                                  currentPath.Contains("/Register", StringComparison.OrdinalIgnoreCase);
+            }
+
+            @inject DessertOrders.Data.ApplicationDbContext _context
+
+<header class="header">
+    <div class="logo">
+        <a href="/Catalog" style="text-decoration: none;">
+            <h1>
+                Крихта.
+                <span>кондитерська з любов'ю</span>
+            </h1>
+        </a>
     </div>
+
+    <!-- Кнопка скрывается только на страницах входа/регистрации -->
+    @if (!isAuthPage)
+    {
+        <div class="user-info" style="display: flex; align-items: center; gap: 15px;">
+            @{
+                var userId = Context.Session.GetInt32("UserId");
+                var userName = Context.Session.GetString("UserName");
+                
+                bool isAdmin = false;
+                if (userId.HasValue)
+                {
+                    var userInDb = _context.Users.Find(userId.Value);
+                    isAdmin = (userInDb != null && userInDb.Role == "Admin");
+                }
+            }
+
+            <!-- Кнопка возврата в админку для администраторов -->
+            @if (isAdmin)
+            {
+                <a href="/Admin/Orders" class="add-btn" style="background: #fdf2f4; color: #c83753; border: 1px solid #c83753; text-decoration: none; padding: 8px 14px; font-size: 13px; border-radius: 8px; font-weight: 600;">
+                    ← В адмінку
+                </a>
+            }
+
+            @if (userId == null)
+            {
+                <a href="/Login" class="add-btn" style="text-decoration: none; padding: 8px 16px; font-size: 13px; display: inline-block; line-height: normal;">Увійти</a>
+            }
+            else
+            {
+                <a href="/Profile" class="user-profile-link">@(string.IsNullOrEmpty(userName) ? "Мій профіль" : userName)</a>
+            }
+        </div>
+    }
+</header>
+            
+            <main role="main" class="content">
+                @RenderBody()
+            </main>
+        </div>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

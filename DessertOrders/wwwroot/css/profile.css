@@ -1,0 +1,411 @@
+﻿/* ==========================================================================
+   1. КОНТЕЙНЕР ТА ГОЛОВНИЙ БЛОК ПРОФІЛЮ
+   ========================================================================== */
+
+.profile-page-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: inherit;
+    color: #333;
+}
+
+.profile-welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+    .profile-welcome h1 {
+        margin: 0 0 5px 0;
+        font-size: 26px;
+        color: #2c2c2c;
+    }
+
+    .profile-welcome p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-card,
+.active-order-card,
+.history-section-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.profile-user-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.user-avatar-circle {
+    width: 50px;
+    height: 50px;
+    background: #fce4ec;
+    color: #c83753;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.profile-user-header h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+}
+
+.badge-guest {
+    background: #f1f3f5;
+    color: #495057;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.registration-date {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 25px;
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+    .section-title-row h4 {
+        margin: 0;
+        font-size: 15px;
+        color: #444;
+    }
+
+.profile-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+    .profile-input:focus {
+        border-color: #c83753;
+    }
+
+/* ==========================================================================
+   2. КАРТКА АКТИВНОГО ЗАМОВЛЕННЯ ТА STEPPER
+   ========================================================================== */
+
+.active-order-card {
+    margin-bottom: 30px;
+}
+
+.order-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .order-top-row h3 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+.status-badge-new {
+    background: #fff0f3;
+    color: #c83753;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge-done {
+    background: #ebfbee;
+    color: #2b8a3e;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.order-date-sub {
+    font-size: 13px;
+    color: #888;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+/* Динамічний індикатор кроків замовлення */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.step, .step-active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #adb5bd;
+    z-index: 2;
+}
+
+.step-active {
+    color: #c83753;
+    font-weight: 600;
+}
+
+.step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f1f3f5;
+    color: #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.step-active .step-circle {
+    background: #c83753;
+    color: white;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #f1f3f5;
+    margin: 0 -15px 18px -15px;
+    transition: background-color 0.3s ease;
+}
+
+    .step-line.active {
+        background-color: #c83753;
+    }
+
+.delivery-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background: #fdf2f4;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.delivery-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.delivery-time-val {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c2c2c;
+    margin-top: 3px;
+}
+
+.delivery-address-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2c2c2c;
+}
+
+.delivery-hint {
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+    display: block;
+}
+
+/* ==========================================================================
+   3. СПИСОК ТОВАРІВ ТА ПІДСУМКИ ЗАМОВЛЕННЯ
+   ========================================================================== */
+
+.order-items-list {
+    border-top: 1px solid #f1f3f5;
+    border-bottom: 1px solid #f1f3f5;
+    padding: 16px 0;
+    margin: 20px 0;
+}
+
+.order-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+    .order-item-row:last-child {
+        margin-bottom: 0;
+    }
+
+.item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2c2c2c;
+}
+
+.item-calc {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+    display: block;
+}
+
+.item-sum {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c2c2c;
+}
+
+.order-footer-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.payment-info-side {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.payment-badge-online {
+    background: #e6fcf5;
+    color: #0ca678;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+    width: fit-content;
+}
+
+.sub-totals-text {
+    font-size: 12px;
+    color: #888;
+}
+
+.total-block-right {
+    text-align: right;
+}
+
+.total-label-sm {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.total-sum-lg {
+    font-size: 22px;
+    font-weight: bold;
+    color: #c83753;
+}
+
+.order-card-bottom-actions {
+    border-top: 1px solid #f1f3f5;
+    padding-top: 15px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.help-text {
+    color: #888;
+}
+
+.contact-link {
+    color: #c83753;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   4. ІСТОРІЯ ЗАМОВЛЕНЬ (ТАБЛИЦЯ)
+   ========================================================================== */
+
+.history-section-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+    .history-table th {
+        text-align: left;
+        color: #888;
+        font-weight: 500;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 12px;
+    }
+
+    .history-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #f1f3f5;
+        vertical-align: middle;
+    }
+
+    .history-table tr {
+        transition: background-color 0.2s ease;
+    }
+
+        .history-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .history-table tr.active-row {
+            background-color: #fdf2f4 !important;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }

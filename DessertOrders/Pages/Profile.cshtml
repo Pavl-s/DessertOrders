@@ -1,0 +1,237 @@
+﻿@page
+@model DessertOrders.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Особистий кабінет";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" />
+
+<div class="profile-page-container">
+    <!-- Вітальний блок -->
+    <div class="profile-welcome">
+        <div>
+            <h1>Раді вам, @(Model.Input.Name.Split(' ').FirstOrDefault())</h1>
+            <p>Ваші улюблені десерти, замовлення та дані — усе в одному місці.</p>
+        </div>
+        <a href="/Catalog" class="add-btn" style="text-decoration: none;">Обрати десерти</a>
+    </div>
+
+    <!-- Повідомлення про успішне оновлення даних -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="action-done-box" style="margin-bottom: 20px;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="profile-grid">
+        <!-- Блок даних профілю користувача -->
+        <div class="profile-card">
+            <div class="profile-user-header">
+                <div class="user-avatar-circle">@Model.UserInitials</div>
+                <div>
+                    <h3>@Model.Input.Name</h3>
+                </div>
+            </div>
+
+            <form method="post">
+                <div class="form-group">
+                    <label>Ім'я та прізвище</label>
+                    <input type="text" asp-for="Input.Name" class="profile-input" required />
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" asp-for="Input.Phone" class="profile-input" placeholder="+380 (99) 000-00-00" />
+                </div>
+                <div class="form-group">
+                    <label>Електронна пошта</label>
+                    <input type="email" asp-for="Input.Email" class="profile-input" required />
+                </div>
+                <button type="submit" class="checkout">Зберегти зміни</button>
+            </form>
+
+            <div class="logout-section" style="margin-top: 20px; text-align: center;">
+                <a href="/Profile?handler=Logout" class="sidebar-bottom-link logout">
+                    🚪 Вийти з акаунта
+                </a>
+            </div>
+        </div>
+
+        <!-- Секція замовлень (активне замовлення + історія) -->
+        <div class="order-section">
+            @if (Model.LatestOrder != null)
+            {
+                <!-- Картка активного/обраного замовлення -->
+                <div class="active-order-card">
+                    <div class="order-top-row">
+                        <h3>Ваше замовлення #@Model.LatestOrder.Id</h3>
+                        <span class="status-badge-new">@Model.LatestOrder.Status</span>
+                    </div>
+                    <p class="order-date-sub">
+                        @Model.LatestOrder.CreatedAt.ToString("dd MMMM yyyy, HH:mm") • @Model.LatestOrder.Items.Sum(i => i.Quantity) десерти
+                    </p>
+                    
+                    @{
+                        // Визначаємо поточний крок для прогрес-бару: 1 = Новий, 2 = Готується, 3 = В дорозі, 4 = Виконано
+                        int stepLevel = Model.LatestOrder.Status switch
+                        {
+                            "Новий" => 1,
+                            "Готується" => 2,
+                            "В дорозі" => 3,
+                            "Виконано" or "Завершені" => 4,
+                            _ => 1
+                        };
+                    }
+
+                    <!-- Динамічний індикатор статусу замовлення (Stepper) -->
+                    <div class="stepper">
+                        <div class="@(stepLevel >= 1 ? "step-active" : "step")">
+                            <div class="step-circle">1</div>
+                            <span>Оформлено</span>
+                        </div>
+
+                        <div class="step-line @(stepLevel >= 2 ? "active" : "")"></div>
+
+                        <div class="@(stepLevel >= 2 ? "step-active" : "step")">
+                            <div class="step-circle">2</div>
+                            <span>Готується</span>
+                        </div>
+
+                        <div class="step-line @(stepLevel >= 3 ? "active" : "")"></div>
+
+                        <div class="@(stepLevel >= 3 ? "step-active" : "step")">
+                            <div class="step-circle">3</div>
+                            <span>В дорозі</span>
+                        </div>
+
+                        <div class="step-line @(stepLevel >= 4 ? "active" : "")"></div>
+
+                        <div class="@(stepLevel >= 4 ? "step-active" : "step")">
+                            <div class="step-circle">4</div>
+                            <span>Виконано</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Деталі отримання та адреса -->
+                <div class="delivery-details-grid">
+                    <div>
+                        <span class="delivery-label">Час отримання</span>
+                        <div class="delivery-time-val">@Model.LatestOrder.DeliveryTime</div>
+                    </div>
+                    <div>
+                        @if (Model.LatestOrder.DeliveryType == "Delivery")
+                        {
+                            <span class="delivery-label">Адреса доставки</span>
+                            <div class="delivery-address-val">@Model.LatestOrder.Address, кв. @Model.LatestOrder.Apartment</div>
+                            <span class="delivery-hint">Зателефонуємо за 10 хвилин до приїзду</span>
+                        }
+                        else
+                        {
+                            <span class="delivery-label">Спосіб</span>
+                            <div class="delivery-address-val">Самовивіз з кондитерської</div>
+                            <span class="delivery-hint">Чекаємо на вас!</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Склад обраного замовлення -->
+                <div class="order-items-list">
+                    <div style="font-size: 13px; font-weight: 600; color: #444; margin-bottom: 12px;">Склад замовлення</div>
+                    @foreach (var orderItem in Model.LatestOrder.Items)
+                    {
+                        <div class="order-item-row">
+                            <div>
+                                <span class="item-name">@orderItem.DessertName</span>
+                                <span class="item-calc">@orderItem.Quantity шт. × @orderItem.Price $</span>
+                            </div>
+                            <span class="item-sum">@(orderItem.Price * orderItem.Quantity) $</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Підсумок оплати -->
+                <div class="order-footer-total">
+                    <div class="payment-info-side">
+                        <span class="payment-badge-online">@Model.LatestOrder.PaymentMethod</span>
+                        <span class="sub-totals-text">
+                            Десерти — @Model.LatestOrder.ItemsTotal $ · Доставка — @Model.LatestOrder.DeliveryFee $
+                        </span>
+                    </div>
+                    <div class="total-block-right">
+                        <span class="total-label-sm">Разом до сплати</span>
+                        <span class="total-sum-lg">@Model.LatestOrder.TotalAmount $</span>
+                    </div>
+                </div>
+
+                <div class="order-card-bottom-actions">
+                    <span class="help-text">Статус замовлення оновлюється в реальному часі.</span>
+                </div>
+            }
+            else
+            {
+                <div class="active-order-card" style="text-align: center; padding: 40px 20px;">
+                    <p style="color: #666; margin-bottom: 15px;">У вас поки немає активних замовлень</p>
+                    <a href="/Catalog" class="add-btn" style="text-decoration: none;">Зробити перше замовлення</a>
+                </div>
+            }
+
+            <!-- Історія всіх замовлень користувача -->
+            <div class="history-section-card" style="margin-top: 30px;">
+                <h3>Мої замовлення</h3>
+                @if (Model.UserOrders.Count > 0)
+                {
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Замовлення та дата</th>
+                                <th>Отримання</th>
+                                <th>Сума</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ord in Model.UserOrders)
+                            {
+                                <tr class="@(Model.LatestOrder?.Id == ord.Id ? "active-row" : "")"
+                                    onclick="location.href='@Url.Page("/Profile", new { id = ord.Id })'"
+                                    style="cursor: pointer;">
+                                    <td>
+                                        <strong class="order-id-txt">Замовлення #@ord.Id</strong>
+                                        <div class="order-date-txt">@ord.CreatedAt.ToString("dd MMMM yyyy")</div>
+                                    </td>
+                                    <td>
+                                        @ord.Items.Sum(i => i.Quantity) десерти · @(ord.DeliveryType == "Delivery" ? "доставка" : "самовивіз")
+                                    </td>
+                                    <td><strong>@ord.TotalAmount $</strong></td>
+                                    <td>
+                                        @if (ord.Status == "Новий")
+                                        {
+                                            <span class="status-badge warning">Нове</span>
+                                        }
+                                        else if (ord.Status == "Готується")
+                                        {
+                                            <span class="status-badge" style="background: #e7f5ff; color: #1c7ed6;">Готується</span>
+                                        }
+                                        else if (ord.Status == "Виконано" || ord.Status == "Завершені")
+                                        {
+                                            <span class="status-badge badge-done">Виконано</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge">@ord.Status</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="color: #888; margin: 0;">Історія замовлень порожня.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

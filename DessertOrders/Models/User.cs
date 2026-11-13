@@ -22,7 +22,6 @@ namespace DessertOrders.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Додаємо навігаційну властивість для зв'язку з замовленнями
         public List<Order> Orders { get; set; } = new();
     }
 }

@@ -21,7 +21,6 @@ namespace DessertOrders.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Делаем Email уникальным на уровне базы данных
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

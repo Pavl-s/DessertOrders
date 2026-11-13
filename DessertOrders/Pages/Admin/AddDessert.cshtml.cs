@@ -38,7 +38,6 @@ namespace DessertOrders.Pages.Admin
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToPage("/Login");
 
-            // Обработка загрузки изображения
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "desserts");

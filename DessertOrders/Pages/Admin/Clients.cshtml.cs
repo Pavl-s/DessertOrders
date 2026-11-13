@@ -32,7 +32,7 @@ namespace DessertOrders.Pages.Admin
 
             var now = DateTime.UtcNow;
             ActiveThisMonthCount = users.Count(u => u.Orders.Any(o => o.CreatedAt.Month == now.Month && o.CreatedAt.Year == now.Year));
-            NewTodayCount = users.Count(u => u.Orders.Any(o => o.CreatedAt.Date == now.Date)); // Упрощенно по первому заказу или дате регистрации
+            NewTodayCount = users.Count(u => u.Orders.Any(o => o.CreatedAt.Date == now.Date));
 
             Clients = users.Select(u => new ClientViewModel
             {
@@ -47,7 +47,6 @@ namespace DessertOrders.Pages.Admin
                 Orders = u.Orders.OrderByDescending(o => o.CreatedAt).ToList()
             }).OrderByDescending(c => c.TotalSpent).ToList();
 
-            // Если передан ID выбранного клиента, показываем его детали в правой панели (или берем первого)
             if (selectedUserId.HasValue)
             {
                 SelectedClient = Clients.FirstOrDefault(c => c.Id == selectedUserId.Value);

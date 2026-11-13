@@ -46,7 +46,6 @@ namespace DessertOrders.Pages.Admin
             }).ToList();
         }
 
-        // Обработчик для изменения статуса десерта через AJAX
         public async Task<IActionResult> OnPostUpdateStatusAsync(int id, string status)
         {
             var dessert = await _context.Desserts.FindAsync(id);
@@ -68,7 +67,6 @@ namespace DessertOrders.Pages.Admin
             return new JsonResult(new { success = true });
         }
 
-        // Обработчик для сохранения отредактированного десерта через модальное окно
         public async Task<IActionResult> OnPostUpdateDessertAsync([FromBody] EditDessertDto dto)
         {
             var dessert = await _context.Desserts.FindAsync(dto.Id);

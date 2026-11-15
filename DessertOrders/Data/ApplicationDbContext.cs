@@ -24,6 +24,9 @@ namespace DessertOrders.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Status)
+                .HasDefaultValue("Новий");
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

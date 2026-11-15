@@ -108,7 +108,9 @@ namespace DessertOrders.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Новий");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");

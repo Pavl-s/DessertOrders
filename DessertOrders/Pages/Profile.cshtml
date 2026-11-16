@@ -205,15 +205,15 @@
                                     </td>
                                     <td><strong>@ord.TotalAmount $</strong></td>
                                     <td>
-                                        @if (ord.Status == "Новий")
+                                        @if (ord.Status == "Новий" || ord.Status == "New")
                                         {
                                             <span class="status-badge warning">Нове</span>
                                         }
-                                        else if (ord.Status == "Готується")
+                                        else if (ord.Status == "Готується" || ord.Status == "Cooking")
                                         {
                                             <span class="status-badge" style="background: #e7f5ff; color: #1c7ed6;">Готується</span>
                                         }
-                                        else if (ord.Status == "Виконано" || ord.Status == "Завершені")
+                                        else if (ord.Status == "Виконано" || ord.Status == "Завершені" || ord.Status == "Completed")
                                         {
                                             <span class="status-badge badge-done">Виконано</span>
                                         }

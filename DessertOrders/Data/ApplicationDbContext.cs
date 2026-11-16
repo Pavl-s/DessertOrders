@@ -26,7 +26,7 @@ namespace DessertOrders.Data
                 .IsUnique();
             modelBuilder.Entity<Order>()
                 .Property(o => o.Status)
-                .HasDefaultValue("Новий");
+                .HasDefaultValue("New");
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {

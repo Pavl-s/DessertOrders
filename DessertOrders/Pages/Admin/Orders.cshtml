@@ -45,17 +45,17 @@
                    class="tab-btn @(Model.CurrentStatus == "Усі" ? "active" : "")">
                    Усі · @Model.AllOrders.Count
                 </a>
-                <a href="@Url.Page("/Admin/Orders", new { status = "Новий", searchQuery = Model.SearchQuery })" 
-                   class="tab-btn @(Model.CurrentStatus == "Новий" ? "active" : "")">
-                   Нові · @Model.AllOrders.Count(o => o.Status == "Новий")
+                <a href="@Url.Page("/Admin/Orders", new { status = "New", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "New" ? "active" : "")">
+                   Нові · @Model.AllOrders.Count(o => o.Status == "New")
                 </a>
-                <a href="@Url.Page("/Admin/Orders", new { status = "Готується", searchQuery = Model.SearchQuery })" 
-                   class="tab-btn @(Model.CurrentStatus == "Готується" ? "active" : "")">
-                   Готуються · @Model.AllOrders.Count(o => o.Status == "Готується")
+                <a href="@Url.Page("/Admin/Orders", new { status = "Cooking", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Cooking" ? "active" : "")">
+                   Готуються · @Model.AllOrders.Count(o => o.Status == "Cooking")
                 </a>
-                <a href="@Url.Page("/Admin/Orders", new { status = "Завершені", searchQuery = Model.SearchQuery })" 
-                   class="tab-btn @(Model.CurrentStatus == "Завершені" ? "active" : "")">
-                   Завершені · @Model.AllOrders.Count(o => o.Status == "Завершені")
+                <a href="@Url.Page("/Admin/Orders", new { status = "Completed", searchQuery = Model.SearchQuery })" 
+                   class="tab-btn @(Model.CurrentStatus == "Completed" ? "active" : "")">
+                   Завершені · @Model.AllOrders.Count(o => o.Status == "Completed")
                 </a>
             </div>
 
@@ -159,14 +159,14 @@
                     <input type="hidden" name="currentStatus" value="@Model.CurrentStatus" />
                     <input type="hidden" name="searchQuery" value="@Model.SearchQuery" />
 
-                    @if (selected.Status == "Новий")
+                    @if (selected.Status == "New" || selected.Status == "Новий")
                     {
-                        <input type="hidden" name="newStatus" value="Готується" />
+                        <input type="hidden" name="newStatus" value="Cooking" />
                         <button type="submit" class="action-btn-primary">Прийняти в роботу</button>
                     }
-                    else if (selected.Status == "Готується")
+                    else if (selected.Status == "Cooking" || selected.Status == "Готується")
                     {
-                        <input type="hidden" name="newStatus" value="Завершені" />
+                        <input type="hidden" name="newStatus" value="Completed" />
                         <button type="submit" class="action-btn-success">Завершити замовлення</button>
                     }
                     else

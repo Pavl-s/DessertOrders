@@ -18,7 +18,7 @@ namespace DessertOrders.Models
         public decimal ItemsTotal { get; set; }
         public decimal DeliveryFee { get; set; }
         public decimal TotalAmount { get; set; }
-        public string Status { get; set; } = "Новий";
+        public string Status { get; set; } = "New";
 
         public List<OrderItem> Items { get; set; } = new();
 
